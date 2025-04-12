@@ -1,4 +1,4 @@
-# FitTrack - Fitness Tracking App
+# FitTrack - Fitness Tracking App (WIP)
 
 A mobile application for logging workouts and tracking fitness goals, built with React Native and Firebase.
 
@@ -8,7 +8,6 @@ A mobile application for logging workouts and tracking fitness goals, built with
 - 🎯 Set and track fitness goals
 - 📊 Weekly progress charts and analytics
 - 🔐 Secure account management with cloud sync
-- 👥 Social features (coming soon)
 
 ## Tech Stack
 
