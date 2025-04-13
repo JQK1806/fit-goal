@@ -2,6 +2,23 @@ import React, { useState } from "react";
 import { View, Text, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Workout } from "../../types/workout";
 import WorkoutSummary from "./components/WorkoutSummary";
+import GoalProgress from "./components/GoalProgress";
+
+// Sample goals data
+const sampleGoals = [
+    {
+        id: '1',
+        name: 'Weekly Workouts',
+        description: 'Complete 5 workouts this week',
+        progess: 60,
+    },
+    {
+        id: '2',
+        name: 'Monthly Goal',
+        description: 'Run 50km this month',
+        progess: 35,
+    },
+];
 
 const HomeScreen = () => {
     const [workouts, setWorkouts] = useState<Workout[]>([])
@@ -14,16 +31,24 @@ const HomeScreen = () => {
                 </View>
 
                 <View style={styles.content}>
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Today's Progress</Text>
-                    {workouts.length > 0 ? (
-                        workouts.map(workout => (
-                            <WorkoutSummary key={workout.id} workout={workout} />
-                        ))
-                    ) : (
-                        <Text style={styles.cardText}>No workouts logged today</Text>
-                    )}
-                </View>
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Today's Workouts</Text>
+                        {workouts.length > 0 ? (
+                            workouts.map(workout => (
+                                <WorkoutSummary key={workout.id} workout={workout} />
+                            ))
+                        ) : (
+                            <Text style={styles.cardText}>No workouts logged today</Text>
+                        )}
+                    </View>
+                    
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Your Goals</Text>
+                        {sampleGoals.map(goal => (
+                            <GoalProgress key={goal.id} goal={goal} />
+                        ))}
+                    </View>
+
                     <View style={styles.card}>
                         <Text style={styles.cardTitle}>Actions</Text>
                         <TouchableOpacity style={styles.button}>
