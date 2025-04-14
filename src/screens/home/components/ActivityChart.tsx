@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Workout } from '../../../types/workout';
 
 /**
@@ -13,8 +13,8 @@ interface ActivityChartProps {
 /**
  * ActivityChart Component
  * 
- * Displays a simple bar chart showing workout activity over time
- * - Shows the number of workouts per day
+ * Displays a calendar-like view showing workout activity over time
+ * - Shows dots on days where workouts were performed
  * - Displays the last 7 days by default
  * 
  * @param {ActivityChartProps} props - The component props
@@ -22,44 +22,41 @@ interface ActivityChartProps {
  */
 const ActivityChart: React.FC<ActivityChartProps> = ({ workouts, days=7 }) => {
     const today = new Date();
-
-     // Create an array of the last 'days' days
+    
+    // Create an array of the last days
     const dates = Array.from({ length: days }, (_, i) => {
         const date = new Date();
         date.setDate(today.getDate() - (days - 1 - i));
         return date;
     });
-
-    // Count workouts for each day
-    const workoutCounts = dates.map(date => {
+    
+    // Check which days have workouts
+    const workoutDays = dates.map(date => {
         const dateString = date.toISOString().split('T')[0];
-        return workouts.filter(workout => {
+        return workouts.some(workout => {
             const workoutDate = new Date(workout.date || Date.now()).toISOString().split('T')[0];
             return workoutDate === dateString;
-        }).length;
+        });
     });
-
-    // Find the maximum count for scaling
-    const maxCount = Math.max(...workoutCounts, 1);
-
-     // Get day names for the x-axis
+    
+    // Get day names for the x-axis
     const dayNames = dates.map(date => {
         return date.toLocaleDateString('en-US', { weekday: 'short' });
     });
-
+    
+    // Get day numbers for the calendar
+    const dayNumbers = dates.map(date => {
+        return date.getDate();
+    });
+    
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Activity</Text>
-            <View style={styles.chartContainer}>
-                {workoutCounts.map((count, index) => (
-                    <View key={index} style={styles.barContainer}>
-                        <View 
-                            style={[
-                                styles.bar, 
-                                { height: `${(count / maxCount) * 100}%` }
-                            ]} 
-                        />
-                        <Text style={styles.dayLabel}>{dayNames[index]}</Text>
+            <View style={styles.calendarContainer}>
+                {dates.map((date, index) => (
+                    <View key={index} style={styles.dayContainer}>
+                        <Text style={styles.dayNumber}>{dayNumbers[index]}</Text>
+                        <Text style={styles.dayName}>{dayNames[index]}</Text>
+                        {workoutDays[index] && <View style={styles.workoutDot} />}
                     </View>
                 ))}
             </View>
@@ -74,38 +71,37 @@ const styles = StyleSheet.create({
     container: {
         padding: 10,
     },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        color: '#333',
-    },
-    chartContainer: {
+    calendarContainer: {
         flexDirection: 'row',
-        height: 150,
-        alignItems: 'flex-end',
         justifyContent: 'space-between',
         marginBottom: 10,
     },
-    barContainer: {
+    dayContainer: {
         alignItems: 'center',
         width: `${100 / 7}%`,
     },
-    bar: {
-        width: '80%',
-        backgroundColor: '#4a90e2',
-        borderRadius: 4,
-        minHeight: 4,
+    dayNumber: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
     },
-    dayLabel: {
-        marginTop: 8,
+    dayName: {
         fontSize: 12,
         color: '#666',
+        marginBottom: 8,
+    },
+    workoutDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#4a90e2',
     },
     subtitle: {
         fontSize: 14,
         color: '#666',
         textAlign: 'center',
+        marginTop: 10,
     },
 });
 

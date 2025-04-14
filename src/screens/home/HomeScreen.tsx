@@ -109,7 +109,7 @@ const HomeScreen = () => {
             <ScrollView>
                 <View style={styles.header}>
                     <Text style={styles.title}>FitTrack</Text>
-                    <Text style={styles.subtitle}>Track your fitnes jounrey</Text>
+                    <Text style={styles.subtitle}>Track your fitness journey</Text>
                 </View>
 
                 <View style={styles.content}>
