@@ -35,6 +35,9 @@ const GoalProgress: React.FC<GoalProps> = ({ goal }) => {
     )
 }
 
+/**
+ * Styles for GoalProgress component
+ */
 const styles = StyleSheet.create({
     container: {
         backgroundColor: 'white',
