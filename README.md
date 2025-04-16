@@ -1,4 +1,4 @@
-# FitTrack - Fitness Tracking App (WIP)
+# FitGoal - Fitness Tracking and Goal Setting App (WIP)
 
 A mobile application for logging workouts and tracking fitness goals, built with React Native and Firebase.
 
@@ -14,5 +14,3 @@ A mobile application for logging workouts and tracking fitness goals, built with
 - React Native with Expo
 - TypeScript
 - Firebase (Authentication & Firestore)
-- React Navigation
-- React Native Chart Kit

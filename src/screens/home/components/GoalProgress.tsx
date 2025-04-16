@@ -1,6 +1,7 @@
 import React from "react";
 import { Goal } from "../../../types/goal";
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text } from 'react-native';
+import { globalStyles, colors, spacing } from '../../../styles/globalStyles';
 
 /**
  * Props for the GoalProgress component
@@ -22,66 +23,19 @@ interface GoalProps {
  */
 const GoalProgress: React.FC<GoalProps> = ({ goal }) => {
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>{goal.name}</Text>
-                <Text style={styles.progress}>{goal.progess}%</Text>
+        <View style={[globalStyles.card, { marginBottom: spacing.sm, backgroundColor: colors.background.primary }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.xs }}>
+                <Text style={[globalStyles.cardTitle, { marginBottom: 0 }]}>{goal.name}</Text>
+                <Text style={[globalStyles.cardText, { color: colors.primary, fontWeight: '600' }]}>
+                    {goal.progess}%
+                </Text>
             </View>
-            <Text style={styles.description}>{goal.description}</Text>
-            <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${goal.progess}%` }]} />
+            <Text style={[globalStyles.cardText, { marginBottom: spacing.sm }]}>{goal.description}</Text>
+            <View style={{ height: 6, backgroundColor: colors.background.secondary, borderRadius: 3, overflow: 'hidden' }}>
+                <View style={{ height: '100%', backgroundColor: colors.primary, borderRadius: 3, width: `${goal.progess}%` }} />
             </View>
         </View>
     )
 }
-
-/**
- * Styles for GoalProgress component
- */
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: 'white',
-        borderRadius: 10,
-        padding: 15,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    title: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    progress: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#4a90e2',
-    },
-    description: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 10,
-    },
-    progressBar: {
-        height: 6,
-        backgroundColor: '#f0f0f0',
-        borderRadius: 3,
-        overflow: 'hidden',
-    },
-    progressFill: {
-        height: '100%',
-        backgroundColor: '#4a90e2',
-        borderRadius: 3,
-    },
-});
 
 export default GoalProgress;

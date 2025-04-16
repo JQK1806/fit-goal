@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, SafeAreaView, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
 import { Workout } from "../../types/workout";
 import WorkoutSummary from "./components/WorkoutSummary";
 import GoalProgress from "./components/GoalProgress";
 import ActivityChart from "./components/ActivityChart";
+import { globalStyles, colors, spacing } from "../../styles/globalStyles";
 
 // Sample goals data
 const sampleGoals = [
@@ -105,44 +106,44 @@ const sampleWorkouts: Workout[] = [
 const HomeScreen = () => {
     const [workouts, setWorkouts] = useState<Workout[]>(sampleWorkouts) // ***TODO*** Temporary for sample data switch back when using real data
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <ScrollView>
-                <View style={styles.header}>
-                    <Text style={styles.title}>FitTrack</Text>
-                    <Text style={styles.subtitle}>Track your fitness journey</Text>
+                <View style={globalStyles.headerContainer}>
+                    <Text style={[globalStyles.title, { color: colors.text.light }]}>FitGoal</Text>
+                    <Text style={[globalStyles.subtitle, { color: colors.text.light }]}>Track your fitness goals</Text>
                 </View>
 
-                <View style={styles.content}>
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>Your Workouts</Text>
+                <View style={globalStyles.contentContainer}>
+                    <View style={globalStyles.card}>
+                        <Text style={globalStyles.cardTitle}>Your Workouts</Text>
                         {workouts.length > 0 ? (
                             workouts.map(workout => (
                                 <WorkoutSummary key={workout.id} workout={workout} />
                             ))
                         ) : (
-                            <Text style={styles.cardText}>No workouts logged today</Text>
+                            <Text style={globalStyles.cardText}>No workouts logged today</Text>
                         )}
                     </View>
                     
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>Your Goals</Text>
+                    <View style={globalStyles.card}>
+                        <Text style={globalStyles.cardTitle}>Your Goals</Text>
                         {sampleGoals.map(goal => (
                             <GoalProgress key={goal.id} goal={goal} />
                         ))}
                     </View>
 
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>Activity</Text>
+                    <View style={globalStyles.card}>
+                        <Text style={globalStyles.cardTitle}>Activity</Text>
                         <ActivityChart workouts={workouts} />
                     </View>
 
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>Actions</Text>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.buttonText}>Log Workout</Text>
+                    <View style={globalStyles.card}>
+                        <Text style={globalStyles.cardTitle}>Actions</Text>
+                        <TouchableOpacity style={[globalStyles.button, { marginBottom: spacing.sm }]}>
+                            <Text style={globalStyles.buttonText}>Log Workout</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button}>
-                            <Text style={styles.buttonText}>Set Goal</Text>
+                        <TouchableOpacity style={globalStyles.button}>
+                            <Text style={globalStyles.buttonText}>Set Goal</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -150,61 +151,5 @@ const HomeScreen = () => {
         </SafeAreaView>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    header: {
-        padding: 20,
-        backgroundColor: '#4a90e2',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: 'white',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: 'white',
-        marginTop: 5,
-    },
-    content: {
-        padding: 20
-    },
-    card: {
-        backgroundColor: 'white',
-        borderRadius: 10,
-        padding: 15,
-        marginBottom: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#333',
-    },
-    cardText: {
-        fontSize: 16,
-        color: '#666',
-    },
-    button: {
-        backgroundColor: '#4a90e2',
-        padding: 15,
-        borderRadius: 8,
-        marginTop: 10,
-    },
-    buttonText: {
-        color: 'white',
-        textAlign: 'center',
-        fontWeight: 'bold',
-    },
-});
 
 export default HomeScreen;
