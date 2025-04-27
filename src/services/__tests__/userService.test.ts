@@ -1,6 +1,6 @@
 import { UserProfile } from '../../types/user';
 import { createUserProfile, getUserProfile } from '../userService';
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Mock Firebase Firestore
 jest.mock('firebase/firestore', () => ({
