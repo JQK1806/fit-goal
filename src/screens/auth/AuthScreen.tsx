@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -24,12 +24,20 @@ const AuthScreen: React.FC = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [shouldNavigate, setShouldNavigate] = useState(false);
     
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertTitle, setAlertTitle] = useState('');
     const [alertMessage, setAlertMessage] = useState('');
     const [alertOnConfirm, setAlertOnConfirm] = useState<(() => void) | undefined>(undefined);
     const [showConfirmButton, setShowConfirmButton] = useState(false);
+
+    useEffect(() => {
+        if (shouldNavigate) {
+            navigation.navigate('Home');
+            setShouldNavigate(false);
+        }
+    }, [shouldNavigate, navigation]);
 
     const showAlert = (title: string, message: string, onConfirm?: () => void, showConfirm = false) => {
         console.log(`Showing alert: ${title} - ${message}`);
@@ -75,7 +83,6 @@ const AuthScreen: React.FC = () => {
         try {
             console.log(`Attempting to ${isLogin ? 'sign in' : 'create user'} with Firebase...`);
             const auth = getAuth();
-            console.log("Auth object:", auth);
             
             if (isLogin) {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -84,56 +91,33 @@ const AuthScreen: React.FC = () => {
                 showAlert(
                     "Success",
                     "Signed in successfully!",
-                    () => navigation.navigate('Home'),
+                    () => setShouldNavigate(true),
                     false
                 );
             } else {
-                try {
-                    console.log("Creating user with email and password...");
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    console.log("User created successfully:", userCredential.user.uid);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log("User created successfully:", userCredential.user.uid);
 
-                    try {
-                        console.log("Updating user profile with display name...");
-                        await updateProfile(userCredential.user, {
-                            displayName: name,
-                        });
-                        console.log("Profile updated with name:", name);
+                await Promise.all([
+                    updateProfile(userCredential.user, { displayName: name }),
+                    createUserProfile({
+                        id: userCredential.user.uid,
+                        displayName: name,
+                        email: email,
+                        createdOn: new Date(),
+                    })
+                ]);
 
-                        try {
-                            // Create user profile in Firestore
-                            console.log("Creating user profile in Firestore...");
-                            const userProfile: UserProfile = {
-                                id: userCredential.user.uid,
-                                displayName: name,
-                                email: email,
-                                createdOn: new Date(),
-                            };
-
-                            await createUserProfile(userProfile);
-                            console.log("User profile created in Firestore successfully");
-
-                            showAlert(
-                                "Success", 
-                                "Account created successfully!", 
-                                () => navigation.navigate('Home'),
-                                false
-                            );
-                        } catch (profileError) {
-                            console.error("Error creating user profile:", profileError);
-                            showAlert("Error", "Account created but failed to set up profile. Please try again.");
-                        }
-                    } catch (updateError) {
-                        console.error("Error updating profile:", updateError);
-                        showAlert("Error", "Failed to update profile. Please try again.");
-                    }
-                } catch (createError) {
-                    console.error("Error creating user:", createError);
-                    throw createError;
-                }
+                console.log("Profile setup completed successfully");
+                showAlert(
+                    "Success", 
+                    "Account created successfully!", 
+                    () => setShouldNavigate(true),
+                    false
+                );
             }
         } catch (error: any) {
-            console.error("Firebase error:", error);
+            console.error("Authentication error:", error);
             let errorMessage = `An error occurred during ${isLogin ? 'sign in' : 'sign up'}`;
 
             if (error.code === 'auth/email-already-in-use') {
