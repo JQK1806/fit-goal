@@ -1,7 +1,6 @@
 import { Workout } from '../types/workout';
-import { getFirestore, collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
-
-const db = getFirestore();
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase/firebaseConfig';
 
 /**
  * Service for handling workout-related operations

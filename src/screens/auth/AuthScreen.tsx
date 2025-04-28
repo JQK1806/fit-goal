@@ -6,6 +6,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import AlertModal from "../../components/AlertModal";
 import { globalStyles, colors, spacing } from "../../styles/globalStyles";
+import { createUserProfile } from "../../services/userService";
+import { UserProfile } from "../../types/user";
 
 type RootStackParamList = {
     Auth: undefined;
@@ -79,22 +81,56 @@ const AuthScreen: React.FC = () => {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 console.log("User signed in successfully:", userCredential.user.uid);
                 
-                navigation.navigate('Home');
-            } else {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                console.log("User created successfully:", userCredential.user.uid);
-
-                await updateProfile(userCredential.user, {
-                    displayName: name,
-                });
-                console.log("Profile updated with name:", name);
-
                 showAlert(
-                    "Success", 
-                    "Account created successfully!", 
+                    "Success",
+                    "Signed in successfully!",
                     () => navigation.navigate('Home'),
                     false
                 );
+            } else {
+                try {
+                    console.log("Creating user with email and password...");
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    console.log("User created successfully:", userCredential.user.uid);
+
+                    try {
+                        console.log("Updating user profile with display name...");
+                        await updateProfile(userCredential.user, {
+                            displayName: name,
+                        });
+                        console.log("Profile updated with name:", name);
+
+                        try {
+                            // Create user profile in Firestore
+                            console.log("Creating user profile in Firestore...");
+                            const userProfile: UserProfile = {
+                                id: userCredential.user.uid,
+                                displayName: name,
+                                email: email,
+                                createdOn: new Date(),
+                            };
+
+                            await createUserProfile(userProfile);
+                            console.log("User profile created in Firestore successfully");
+
+                            showAlert(
+                                "Success", 
+                                "Account created successfully!", 
+                                () => navigation.navigate('Home'),
+                                false
+                            );
+                        } catch (profileError) {
+                            console.error("Error creating user profile:", profileError);
+                            showAlert("Error", "Account created but failed to set up profile. Please try again.");
+                        }
+                    } catch (updateError) {
+                        console.error("Error updating profile:", updateError);
+                        showAlert("Error", "Failed to update profile. Please try again.");
+                    }
+                } catch (createError) {
+                    console.error("Error creating user:", createError);
+                    throw createError;
+                }
             }
         } catch (error: any) {
             console.error("Firebase error:", error);

@@ -1,7 +1,6 @@
 import { UserProfile } from '../types/user';
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-
-const db = getFirestore();
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase/firebaseConfig';
 
 /**
  * Creates a new user profile in Firestore
@@ -10,12 +9,15 @@ const db = getFirestore();
  */
 export const createUserProfile = async (userProfile: UserProfile): Promise<void> => {
     try {
+        console.log('Creating user profile with data:', userProfile);
         const userRef = doc(db, 'users', userProfile.id);
         await setDoc(userRef, {
             ...userProfile,
             createdOn: new Date(),
         });
+        console.log('User profile created successfully');
     } catch (error) {
+        console.error('Error in createUserProfile:', error);
         throw error;
     }
 };
@@ -35,6 +37,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
         }
         return null;
     } catch (error) {
+        console.error('Error in getUserProfile:', error);
         throw error;
     }
 };

@@ -1,9 +1,13 @@
 import { Workout, Exercise } from '../../types/workout';
 import { workoutService } from '../workoutService';
-import { getFirestore, collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+
+// Mock the db import from firebaseConfig
+jest.mock('../../../firebase/firebaseConfig', () => ({
+    db: { type: 'firestore' }
+}));
 
 jest.mock('firebase/firestore', () => ({
-    getFirestore: jest.fn(() => ({ type: 'firestore' })),
     collection: jest.fn(),
     getDocs: jest.fn(),
     query: jest.fn(),
@@ -38,7 +42,6 @@ describe('workoutService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (getFirestore as jest.Mock).mockReturnValue({ type: 'firestore' });
     });
 
     describe('getWorkoutById', () => {

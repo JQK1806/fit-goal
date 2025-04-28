@@ -1,10 +1,14 @@
 import { UserProfile } from '../../types/user';
 import { createUserProfile, getUserProfile } from '../userService';
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+
+// Mock the db import from firebaseConfig
+jest.mock('../../../firebase/firebaseConfig', () => ({
+    db: { type: 'firestore' }
+}));
 
 // Mock Firebase Firestore
 jest.mock('firebase/firestore', () => ({
-    getFirestore: jest.fn(() => ({ type: 'firestore' })),
     doc: jest.fn(),
     setDoc: jest.fn(),
     getDoc: jest.fn(),
@@ -26,7 +30,6 @@ describe('userService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (getFirestore as jest.Mock).mockReturnValue({ type: 'firestore' });
     });
 
     describe('createUserProfile', () => {
