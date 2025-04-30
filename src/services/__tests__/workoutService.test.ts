@@ -1,6 +1,6 @@
 import { Workout, Exercise } from '../../types/workout';
 import { workoutService } from '../workoutService';
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, addDoc } from 'firebase/firestore';
 
 // Mock the db import from firebaseConfig
 jest.mock('../../../firebase/firebaseConfig', () => ({
@@ -14,6 +14,7 @@ jest.mock('firebase/firestore', () => ({
     where: jest.fn(),
     doc: jest.fn(),
     getDoc: jest.fn(),
+    addDoc: jest.fn(),
 }));
 
 describe('workoutService', () => {
@@ -131,6 +132,58 @@ describe('workoutService', () => {
             (getDocs as jest.Mock).mockRejectedValue(error);
 
             await expect(workoutService.getUserWorkouts(mockWorkout.userId)).rejects.toThrow('Retrieval failed');
+        });
+    });
+
+    describe('createWorkout', () => {
+        it('should create a new workout and return it with an id', async () => {
+            const newWorkout: Omit<Workout, 'id'> = {
+                userId: 'user-1',
+                name: 'New Workout',
+                description: 'Test workout',
+                duration: 45,
+                exercises: [mockExercise],
+                date: new Date('2024-04-24'),
+                type: 'strength',
+                intensity: 7,
+                caloriesBurned: 300
+            };
+
+            const mockDocRef = {
+                id: 'new-workout-id'
+            };
+
+            (collection as jest.Mock).mockReturnValue('mock-collection');
+            (addDoc as jest.Mock).mockResolvedValue(mockDocRef);
+
+            const result = await workoutService.createWorkout(newWorkout);
+
+            expect(collection).toHaveBeenCalledWith({ type: 'firestore' }, 'workouts');
+            expect(addDoc).toHaveBeenCalledWith('mock-collection', newWorkout);
+            expect(result).toEqual({
+                id: 'new-workout-id',
+                ...newWorkout
+            });
+        });
+
+        it('should throw an error when creation fails', async () => {
+            const newWorkout: Omit<Workout, 'id'> = {
+                userId: 'user-1',
+                name: 'New Workout',
+                description: 'Test workout',
+                duration: 45,
+                exercises: [mockExercise],
+                date: new Date('2024-04-24'),
+                type: 'strength',
+                intensity: 7,
+                caloriesBurned: 300
+            };
+
+            const error = new Error('Creation failed');
+            (collection as jest.Mock).mockReturnValue('mock-collection');
+            (addDoc as jest.Mock).mockRejectedValue(error);
+
+            await expect(workoutService.createWorkout(newWorkout)).rejects.toThrow('Creation failed');
         });
     });
 }); 

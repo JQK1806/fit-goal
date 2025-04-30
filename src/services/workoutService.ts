@@ -1,5 +1,5 @@
 import { Workout } from '../types/workout';
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase/firebaseConfig';
 
 /**
@@ -42,6 +42,24 @@ export const workoutService = {
             })) as Workout[];
         } catch (error) {
             console.error('Error getting user workouts:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Create a new workout
+     * @param workout - The workout data to create
+     * @returns Promise<Workout> - The created workout with id
+     */
+    async createWorkout(workout: Omit<Workout, 'id'>): Promise<Workout> {
+        try {
+            const docRef = await addDoc(collection(db, 'workouts'), workout);
+            return {
+                id: docRef.id,
+                ...workout
+            } as Workout;
+        } catch (error) {
+            console.error('Error creating workout:', error);
             throw error;
         }
     }
