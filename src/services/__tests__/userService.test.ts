@@ -1,5 +1,5 @@
 import { UserProfile } from '../../types/user';
-import { createUserProfile, getUserProfile } from '../userService';
+import { userService } from '../userService';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // Mock the db import from firebaseConfig
@@ -37,7 +37,7 @@ describe('userService', () => {
             (doc as jest.Mock).mockReturnValue('mock-doc-ref');
             (setDoc as jest.Mock).mockResolvedValue(undefined);
 
-            await createUserProfile(mockUser);
+            await userService.createUserProfile(mockUser);
 
             expect(doc).toHaveBeenCalledWith({ type: 'firestore' }, 'users', mockUser.id);
             expect(setDoc).toHaveBeenCalledWith(
@@ -54,7 +54,7 @@ describe('userService', () => {
             (doc as jest.Mock).mockReturnValue('mock-doc-ref');
             (setDoc as jest.Mock).mockRejectedValue(error);
 
-            await expect(createUserProfile(mockUser)).rejects.toThrow('Creation failed');
+            await expect(userService.createUserProfile(mockUser)).rejects.toThrow('Creation failed');
         });
     });
 
@@ -68,7 +68,7 @@ describe('userService', () => {
             (doc as jest.Mock).mockReturnValue('mock-doc-ref');
             (getDoc as jest.Mock).mockResolvedValue(mockDocSnap);
 
-            const result = await getUserProfile(mockUser.id);
+            const result = await userService.getUserProfile(mockUser.id);
 
             expect(doc).toHaveBeenCalledWith({ type: 'firestore' }, 'users', mockUser.id);
             expect(getDoc).toHaveBeenCalledWith('mock-doc-ref');
@@ -84,7 +84,7 @@ describe('userService', () => {
             (doc as jest.Mock).mockReturnValue('mock-doc-ref');
             (getDoc as jest.Mock).mockResolvedValue(mockDocSnap);
 
-            const result = await getUserProfile(mockUser.id);
+            const result = await userService.getUserProfile(mockUser.id);
 
             expect(result).toBeNull();
         });
@@ -94,7 +94,7 @@ describe('userService', () => {
             (doc as jest.Mock).mockReturnValue('mock-doc-ref');
             (getDoc as jest.Mock).mockRejectedValue(error);
 
-            await expect(getUserProfile(mockUser.id)).rejects.toThrow('Retrieval failed');
+            await expect(userService.getUserProfile(mockUser.id)).rejects.toThrow('Retrieval failed');
         });
     });
 }); 
