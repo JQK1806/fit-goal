@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import AlertModal from "../../components/AlertModal";
 import { globalStyles, colors, spacing } from "../../styles/globalStyles";
-import { createUserProfile } from "../../services/userService";
-import { UserProfile } from "../../types/user";
+import { useAuth } from "../../hooks/useAuth";
 
 type RootStackParamList = {
     Auth: undefined;
@@ -18,131 +16,26 @@ type AuthScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'A
 
 const AuthScreen: React.FC = () => {
     const navigation = useNavigation<AuthScreenNavigationProp>();
-    const [isLogin, setIsLogin] = useState(true);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [shouldNavigate, setShouldNavigate] = useState(false);
-    
-    const [alertVisible, setAlertVisible] = useState(false);
-    const [alertTitle, setAlertTitle] = useState('');
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertOnConfirm, setAlertOnConfirm] = useState<(() => void) | undefined>(undefined);
-    const [showConfirmButton, setShowConfirmButton] = useState(false);
-
-    useEffect(() => {
-        if (shouldNavigate) {
-            navigation.navigate('Home');
-            setShouldNavigate(false);
-        }
-    }, [shouldNavigate, navigation]);
-
-    const showAlert = (title: string, message: string, onConfirm?: () => void, showConfirm = false) => {
-        console.log(`Showing alert: ${title} - ${message}`);
-        setAlertTitle(title);
-        setAlertMessage(message);
-        setAlertOnConfirm(onConfirm);
-        setShowConfirmButton(showConfirm);
-        setAlertVisible(true);
-    };
-
-    const validateForm = () => {
-        if (!email.trim()) {
-          showAlert("Error", "Please enter your email");
-          return false;
-        }
-        if (!/\S+@\S+\.\S+/.test(email)) {
-          showAlert("Error", "Please enter a valid email");
-          return false;
-        }
-        if (password.length < 6) {
-          showAlert("Error", "Password must be at least 6 characters");
-          return false;
-        }
-        
-        if (!isLogin) {
-          if (!name.trim()) {
-            showAlert("Error", "Please enter your name");
-            return false;
-          }
-          if (password !== confirmPassword) {
-            showAlert("Error", "Passwords do not match");
-            return false;
-          }
-        }
-        
-        return true;
-    };
-
-    const handleAuth = async () => {
-        if (!validateForm()) return;
-        setLoading(true);
-        
-        try {
-            console.log(`Attempting to ${isLogin ? 'sign in' : 'create user'} with Firebase...`);
-            const auth = getAuth();
-            
-            if (isLogin) {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log("User signed in successfully:", userCredential.user.uid);
-                
-                showAlert(
-                    "Success",
-                    "Signed in successfully!",
-                    () => setShouldNavigate(true),
-                    false
-                );
-            } else {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                console.log("User created successfully:", userCredential.user.uid);
-
-                await Promise.all([
-                    updateProfile(userCredential.user, { displayName: name }),
-                    createUserProfile({
-                        id: userCredential.user.uid,
-                        displayName: name,
-                        email: email,
-                        createdOn: new Date(),
-                    })
-                ]);
-
-                console.log("Profile setup completed successfully");
-                showAlert(
-                    "Success", 
-                    "Account created successfully!", 
-                    () => setShouldNavigate(true),
-                    false
-                );
-            }
-        } catch (error: any) {
-            console.error("Authentication error:", error);
-            let errorMessage = `An error occurred during ${isLogin ? 'sign in' : 'sign up'}`;
-
-            if (error.code === 'auth/email-already-in-use') {
-                errorMessage = 'Email already in use';
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage = 'Invalid email address';
-            } else if (error.code === 'auth/weak-password') {
-                errorMessage = 'Password is too weak';
-            } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                errorMessage = 'Invalid email or password';
-            }
-
-            showAlert("Error", errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const toggleAuthMode = () => {
-        setIsLogin(!isLogin);
-        setName('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-    };
+    const {
+        isLogin,
+        name,
+        email,
+        password,
+        confirmPassword,
+        loading,
+        alertVisible,
+        alertTitle,
+        alertMessage,
+        showConfirmButton,
+        setName,
+        setEmail,
+        setPassword,
+        setConfirmPassword,
+        setAlertVisible,
+        toggleAuthMode,
+        handleAuth,
+        showAlert
+    } = useAuth(() => navigation.navigate('Home'));
 
     return (
         <SafeAreaView style={globalStyles.container}>
@@ -241,7 +134,7 @@ const AuthScreen: React.FC = () => {
             title={alertTitle}
             message={alertMessage}
             onClose={() => setAlertVisible(false)}
-            onConfirm={alertOnConfirm}
+            onConfirm={() => setAlertVisible(false)}
             showConfirmButton={showConfirmButton}
             confirmText="Continue"
           />

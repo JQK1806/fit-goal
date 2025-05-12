@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { Workout } from "../../types/workout";
-import { Goal } from "../../types/goal";
 import WorkoutSummary from "./components/WorkoutSummary";
 import GoalProgress from "./components/GoalProgress";
 import ActivityChart from "./components/ActivityChart";
 import { globalStyles, colors, spacing } from "../../styles/globalStyles";
+import { useHomeData } from "../../hooks/useHomeData";
 
 /**
  * The landing page HomeScreen component that displays a users'
@@ -15,8 +14,7 @@ import { globalStyles, colors, spacing } from "../../styles/globalStyles";
  * @returns {JSX.Element} The rendered HomeScreen
  */
 const HomeScreen = () => {
-    const [workouts, setWorkouts] = useState<Workout[]>([]);
-    const [goals, setGoals] = useState<Goal[]>([]);
+    const { workouts, goals } = useHomeData();
 
     return (
         <SafeAreaView style={globalStyles.container}>
