@@ -5,7 +5,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { globalStyles, colors, spacing } from '../../styles/globalStyles';
 import { workoutService } from '../../services/workoutService';
 import { Workout } from '../../types/workout';
-import { Exercise } from '../../types/exercise';
 import { RootStackParamList } from '../../../App';
 
 type LogWorkoutScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LogWorkout'>;
@@ -14,7 +13,9 @@ const workoutTypes: Workout['type'][] = ['strength', 'cardio', 'flexibility', 'h
 
 const LogWorkoutScreen = () => {
     const navigation = useNavigation<LogWorkoutScreenNavigationProp>();
-    const [workout, setWorkout] = useState<Partial<Workout>>({
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [workout, setWorkout] = useState<Required<Pick<Workout, 'name' | 'description' | 'duration' | 'type' | 'intensity' | 'exercises' | 'date' | 'notes' | 'caloriesBurned'>>>({
         name: '',
         description: '',
         duration: 0,
@@ -28,6 +29,18 @@ const LogWorkoutScreen = () => {
 
     const handleSave = async () => {
         try {
+            setIsLoading(true);
+            setError(null);
+
+            if (!workout.name.trim()) {
+                setError('Please enter a workout name');
+                return;
+            }
+            if (workout.duration <= 0) {
+                setError('Please enter a valid duration');
+                return;
+            }
+            
             // TODO: Get actual user ID from auth context
             const userId = 'current-user-id';
             const newWorkout = await workoutService.createWorkout({
@@ -39,7 +52,9 @@ const LogWorkoutScreen = () => {
             navigation.goBack();
         } catch (error) {
             console.error('Error saving workout:', error);
-            // TODO: Show error message to user
+            setError('Failed to save workout. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
