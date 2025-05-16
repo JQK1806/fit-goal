@@ -134,10 +134,7 @@ const AuthScreen: React.FC = () => {
             title={alertTitle}
             message={alertMessage}
             onClose={() => setAlertVisible(false)}
-            onConfirm={() => {
-              if (alertOnConfirm) alertOnConfirm();
-              setAlertVisible(false);
-            }}
+            onConfirm={() => setAlertVisible(false)}
             showConfirmButton={showConfirmButton}
             confirmText="Continue"
           />

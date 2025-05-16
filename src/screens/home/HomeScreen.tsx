@@ -1,10 +1,15 @@
 import React from "react";
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import WorkoutSummary from "./components/WorkoutSummary";
 import GoalProgress from "./components/GoalProgress";
 import ActivityChart from "./components/ActivityChart";
 import { globalStyles, colors, spacing } from "../../styles/globalStyles";
 import { useHomeData } from "../../hooks/useHomeData";
+import { RootStackParamList } from '../../../App';
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 /**
  * The landing page HomeScreen component that displays a users'
@@ -15,6 +20,11 @@ import { useHomeData } from "../../hooks/useHomeData";
  */
 const HomeScreen = () => {
     const { workouts, goals } = useHomeData();
+    const navigation = useNavigation<HomeScreenNavigationProp>();
+
+    const handleLogWorkout = () => {
+        navigation.navigate('LogWorkout');
+    };
 
     return (
         <SafeAreaView style={globalStyles.container}>
@@ -54,7 +64,10 @@ const HomeScreen = () => {
 
                     <View style={globalStyles.card}>
                         <Text style={globalStyles.cardTitle}>Actions</Text>
-                        <TouchableOpacity style={[globalStyles.button, { marginBottom: spacing.sm }]}>
+                        <TouchableOpacity 
+                            style={[globalStyles.button, { marginBottom: spacing.sm }]}
+                            onPress={handleLogWorkout}
+                        >
                             <Text style={globalStyles.buttonText}>Log Workout</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={globalStyles.button}>

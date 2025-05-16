@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { userService } from '../services/userService';
 
@@ -45,9 +45,16 @@ export const useAuth = (onAuthSuccess: () => void): UseAuthReturn => {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertOnConfirm, setAlertOnConfirm] = useState<(() => void) | undefined>(undefined);
     const [showConfirmButton, setShowConfirmButton] = useState(false);
+    const [authSuccess, setAuthSuccess] = useState(false);
+
+    useEffect(() => {
+        if (authSuccess) {
+            onAuthSuccess();
+            setAuthSuccess(false);
+        }
+    }, [authSuccess, onAuthSuccess]);
 
     const showAlert = (title: string, message: string, onConfirm?: () => void, showConfirm = false) => {
-        console.log(`Showing alert: ${title} - ${message}`);
         setAlertTitle(title);
         setAlertMessage(message);
         setAlertOnConfirm(onConfirm);
@@ -88,22 +95,14 @@ export const useAuth = (onAuthSuccess: () => void): UseAuthReturn => {
         setLoading(true);
         
         try {
-            console.log(`Attempting to ${isLogin ? 'sign in' : 'create user'} with Firebase...`);
             const auth = getAuth();
             
             if (isLogin) {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log("User signed in successfully:", userCredential.user.uid);
-                
-                showAlert(
-                    "Success",
-                    "Signed in successfully!",
-                    onAuthSuccess,
-                    false
-                );
+                showAlert("Success", "Signed in successfully!");
+                setAuthSuccess(true);
             } else {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                console.log("User created successfully:", userCredential.user.uid);
 
                 await Promise.all([
                     updateProfile(userCredential.user, { displayName: name }),
@@ -115,13 +114,8 @@ export const useAuth = (onAuthSuccess: () => void): UseAuthReturn => {
                     })
                 ]);
 
-                console.log("Profile setup completed successfully");
-                showAlert(
-                    "Success", 
-                    "Account created successfully!", 
-                    onAuthSuccess,
-                    false
-                );
+                showAlert("Success", "Account created successfully!");
+                setAuthSuccess(true);
             }
         } catch (error: any) {
             console.error("Authentication error:", error);

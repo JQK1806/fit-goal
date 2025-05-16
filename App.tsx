@@ -4,17 +4,18 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Text, StyleSheet } from 'react-native';
 import HomeScreen from './src/screens/home/HomeScreen';
 import AuthScreen from './src/screens/auth/AuthScreen';
+import LogWorkoutScreen from './src/screens/workout/LogWorkoutScreen';
 import './firebase/firebaseConfig';
 
 export type RootStackParamList = {
   Auth: undefined;
   Home: undefined;
+  LogWorkout: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Auth">
@@ -26,6 +27,11 @@ export default function App() {
         <Stack.Screen 
           name="Home" 
           component={HomeScreen} 
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen 
+          name="LogWorkout" 
+          component={LogWorkoutScreen} 
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
