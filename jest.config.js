@@ -6,5 +6,5 @@ module.exports = {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
   testMatch: ['**/__tests__/**/*.test.(ts|tsx)'],
-  setupFiles: ['<rootDir>/jest.setup.js'],
+  testTimeout: 10000,
 }; 

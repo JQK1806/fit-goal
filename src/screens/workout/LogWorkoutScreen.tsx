@@ -48,7 +48,7 @@ const LogWorkoutScreen = () => {
                 return;
             }
             
-            const newWorkout = await workoutService.createWorkout({
+            await workoutService.createWorkout({
                 ...workout,
                 userId,
             } as Omit<Workout, 'id'>);
