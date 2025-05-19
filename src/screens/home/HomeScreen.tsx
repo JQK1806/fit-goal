@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import WorkoutSummary from "./components/WorkoutSummary";
@@ -19,12 +19,30 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
  * @returns {JSX.Element} The rendered HomeScreen
  */
 const HomeScreen = () => {
-    const { workouts, goals } = useHomeData();
+    const { workouts, goals, loading, error } = useHomeData();
     const navigation = useNavigation<HomeScreenNavigationProp>();
 
     const handleLogWorkout = () => {
         navigation.navigate('LogWorkout');
     };
+
+    if (loading) {
+        return (
+            <SafeAreaView style={[globalStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </SafeAreaView>
+        );
+    }
+
+    if (error) {
+        return (
+            <SafeAreaView style={globalStyles.container}>
+                <View style={[globalStyles.contentContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <Text style={[globalStyles.errorText, { textAlign: 'center' }]}>{error}</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={globalStyles.container}>
@@ -77,7 +95,7 @@ const HomeScreen = () => {
                 </View>
             </ScrollView>
         </SafeAreaView>
-    )
-}
+    );
+};
 
 export default HomeScreen;

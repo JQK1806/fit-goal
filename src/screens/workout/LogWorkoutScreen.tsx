@@ -6,6 +6,7 @@ import { globalStyles, colors, spacing } from '../../styles/globalStyles';
 import { workoutService } from '../../services/workoutService';
 import { Workout } from '../../types/workout';
 import { RootStackParamList } from '../../../App';
+import { useCurrentUser } from '../../hooks/useCurrentUser';
 
 type LogWorkoutScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LogWorkout'>;
 
@@ -13,6 +14,7 @@ const workoutTypes: Workout['type'][] = ['strength', 'cardio', 'flexibility', 'h
 
 const LogWorkoutScreen = () => {
     const navigation = useNavigation<LogWorkoutScreenNavigationProp>();
+    const userId = useCurrentUser();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [workout, setWorkout] = useState<Required<Pick<Workout, 'name' | 'description' | 'duration' | 'type' | 'intensity' | 'exercises' | 'date' | 'notes' | 'caloriesBurned'>>>({
@@ -32,6 +34,11 @@ const LogWorkoutScreen = () => {
             setIsLoading(true);
             setError(null);
 
+            if (!userId) {
+                setError('You must be logged in to log a workout');
+                return;
+            }
+
             if (!workout.name.trim()) {
                 setError('Please enter a workout name');
                 return;
@@ -41,8 +48,6 @@ const LogWorkoutScreen = () => {
                 return;
             }
             
-            // TODO: Get actual user ID from auth context
-            const userId = 'current-user-id';
             const newWorkout = await workoutService.createWorkout({
                 ...workout,
                 userId,

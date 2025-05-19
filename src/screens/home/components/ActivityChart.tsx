@@ -12,6 +12,17 @@ interface ActivityChartProps {
 }
 
 /**
+ * Helper function to convert any date-like value to a Date object
+ */
+const toDate = (dateValue: any): Date => {
+    if (!dateValue) return new Date();
+    if (dateValue instanceof Date) return dateValue;
+    if (typeof dateValue === 'string') return new Date(dateValue);
+    if (dateValue.toDate) return dateValue.toDate(); // Handle Firestore Timestamp
+    return new Date(dateValue);
+};
+
+/**
  * ActivityChart Component
  * 
  * Displays a calendar-like view showing workout activity over time
@@ -35,8 +46,8 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ workouts, days=7 }) => {
     const workoutDays = dates.map(date => {
         const dateString = date.toISOString().split('T')[0];
         return workouts.some(workout => {
-            const workoutDate = new Date(workout.date || Date.now()).toISOString().split('T')[0];
-            return workoutDate === dateString;
+            const workoutDate = toDate(workout.date);
+            return workoutDate.toISOString().split('T')[0] === dateString;
         });
     });
     
@@ -73,7 +84,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ workouts, days=7 }) => {
                 ))}
             </View>
         </View>
-    )
-}
+    );
+};
 
 export default ActivityChart;
