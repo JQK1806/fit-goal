@@ -1,6 +1,6 @@
 import { UserProfile } from '../../types/user';
 import { userService } from '../userService';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
 // Mock the db import from firebaseConfig
 jest.mock('../../../firebase/firebaseConfig', () => ({
@@ -95,6 +95,39 @@ describe('userService', () => {
             (getDoc as jest.Mock).mockRejectedValue(error);
 
             await expect(userService.getUserProfile(mockUser.id)).rejects.toThrow('Retrieval failed');
+        });
+    });
+
+    describe('updateUserProfile', () => {
+        it('should update user profile successfully', async () => {
+            const updates = {
+                displayName: 'Updated Name',
+                weight: 80
+            };
+
+            (doc as jest.Mock).mockReturnValue('mock-doc-ref');
+            (updateDoc as jest.Mock).mockResolvedValue(undefined);
+
+            await userService.updateUserProfile(mockUser.id, updates);
+
+            expect(doc).toHaveBeenCalledWith({ type: 'firestore' }, 'users', mockUser.id);
+            expect(updateDoc).toHaveBeenCalledWith(
+                'mock-doc-ref',
+                expect.objectContaining({
+                    ...updates,
+                    updatedOn: expect.any(Date)
+                })
+            );
+        });
+
+        it('should throw an error when update fails', async () => {
+            const updates = { displayName: 'Updated Name' };
+            const error = new Error('Update failed');
+            
+            (doc as jest.Mock).mockReturnValue('mock-doc-ref');
+            (updateDoc as jest.Mock).mockRejectedValue(error);
+
+            await expect(userService.updateUserProfile(mockUser.id, updates)).rejects.toThrow('Update failed');
         });
     });
 }); 

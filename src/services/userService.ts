@@ -44,5 +44,25 @@ export const userService = {
             console.error('Error in getUserProfile:', error);
             throw error;
         }
+    },
+
+    /**
+     * Updates an existing user profile
+     * @param userId The ID of the user to update
+     * @param updates The partial user profile data to update
+     * @returns Promise<void>
+     */
+    async updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<void> {
+        try {
+            const userRef = doc(db, 'users', userId);
+            await updateDoc(userRef, {
+                ...updates,
+                updatedOn: new Date(),
+            });
+            console.log('User profile updated successfully');
+        } catch (error) {
+            console.error('Error in updateUserProfile:', error);
+            throw error;
+        }
     }
 };
