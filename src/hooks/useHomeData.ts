@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Workout } from '../types/workout';
 import { Goal } from '../types/goal';
-import { workoutService } from '../services/workoutService';
-import { goalService } from '../services/goalService';
 import { useCurrentUser } from './useCurrentUser';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase/firebaseConfig';
 
 interface UseHomeDataReturn {
     workouts: Workout[];
@@ -16,7 +16,7 @@ interface UseHomeDataReturn {
  * Custom hook for managing home screen data
  * 
  * Manages the state for workouts and goals displayed on the home screen.
- * Fetches data for the currently authenticated user.
+ * Uses real-time listeners to automatically update when data changes.
  * 
  * @returns {UseHomeDataReturn} Object containing workouts and goals state
  */
@@ -28,32 +28,64 @@ export const useHomeData = (): UseHomeDataReturn => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            if (!userId) {
-                setWorkouts([]);
-                setGoals([]);
-                setLoading(false);
-                return;
-            }
+        if (!userId) {
+            setWorkouts([]);
+            setGoals([]);
+            setLoading(false);
+            return;
+        }
 
-            try {
-                setLoading(true);
-                const [fetchedWorkouts, fetchedGoals] = await Promise.all([
-                    workoutService.getUserWorkouts(userId),
-                    goalService.getUserGoals(userId)
-                ]);
-                setWorkouts(fetchedWorkouts);
-                setGoals(fetchedGoals);
-                setError(null);
-            } catch (err) {
-                console.error('Error fetching home data:', err);
-                setError('Failed to load data. Please try again.');
-            } finally {
+        setLoading(true);
+        setError(null);
+
+        const workoutsQuery = query(
+            collection(db, 'workouts'),
+            where('userId', '==', userId)
+        );
+
+        const workoutsUnsubscribe = onSnapshot(
+            workoutsQuery,
+            (snapshot) => {
+                const workoutData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })) as Workout[];
+                setWorkouts(workoutData);
+                setLoading(false);
+            },
+            (err) => {
+                console.error('Error listening to workouts:', err);
+                setError('Failed to load workouts. Please try again.');
                 setLoading(false);
             }
+        );
+
+        const goalsQuery = query(
+            collection(db, 'goals'),
+            where('userId', '==', userId)
+        );
+
+        const goalsUnsubscribe = onSnapshot(
+            goalsQuery,
+            (snapshot) => {
+                const goalData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                })) as Goal[];
+                setGoals(goalData);
+                setLoading(false);
+            },
+            (err) => {
+                console.error('Error listening to goals:', err);
+                setError('Failed to load goals. Please try again.');
+                setLoading(false);
+            }
+        );
+
+        return () => {
+            workoutsUnsubscribe();
+            goalsUnsubscribe();
         };
-
-        fetchData();
     }, [userId]);
 
     return {

@@ -11,7 +11,7 @@
  * @property {Date} targetDate - When the goal should be completed by
  * @property {string} type - Type of goal (e.g., 'workout', 'weight', 'distance')
  * @property {number} targetValue - The target value to achieve
- * @property {string} unit - Unit of measurement (e.g., 'kg', 'km', 'workouts')
+ * @property {string} unit - Unit of measurement (e.g., 'days', 'minutes', 'hours' for workouts; 'kg', 'lbs' for weight; 'km', 'miles', 'm' for distance)
  * @property {boolean} completed - Whether the goal has been completed
  */
 
