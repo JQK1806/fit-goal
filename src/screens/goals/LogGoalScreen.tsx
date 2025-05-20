@@ -7,6 +7,13 @@ import { useCurrentUser } from '../../hooks/useCurrentUser';
 import { goalService } from '../../services/goalService';
 import { RootStackParamList } from '../../../App';
 
+const GOAL_UNITS = {
+    workout: ['days', 'minutes', 'hours'],
+    weight: ['kg', 'lbs'],
+    distance: ['km', 'miles', 'm'],
+    custom: ['units']
+} as const;
+
 type LogGoalScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'LogGoal'>;
 
 const LogGoalScreen = () => {
@@ -14,6 +21,7 @@ const LogGoalScreen = () => {
     const userId = useCurrentUser();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showUnitMenu, setShowUnitMenu] = useState(false);
 
     const [goalData, setGoalData] = useState({
         name: '',
@@ -61,6 +69,8 @@ const LogGoalScreen = () => {
         }
     };
 
+    const availableUnits = GOAL_UNITS[goalData.type] || GOAL_UNITS.custom;
+
     return (
         <SafeAreaView style={globalStyles.container}>
             <ScrollView>
@@ -99,7 +109,13 @@ const LogGoalScreen = () => {
                                         styles.typeButton,
                                         goalData.type === type && styles.typeButtonActive
                                     ]}
-                                    onPress={() => setGoalData({ ...goalData, type: type as any })}
+                                    onPress={() => {
+                                        setGoalData({ 
+                                            ...goalData, 
+                                            type: type as any,
+                                            unit: GOAL_UNITS[type as keyof typeof GOAL_UNITS][0] // Set default unit for type
+                                        });
+                                    }}
                                 >
                                     <Text style={[
                                         styles.typeButtonText,
@@ -121,12 +137,35 @@ const LogGoalScreen = () => {
                         />
 
                         <Text style={styles.label}>Unit *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={goalData.unit}
-                            onChangeText={(text) => setGoalData({ ...goalData, unit: text })}
-                            placeholder="Enter unit (e.g., kg, km, workouts)"
-                        />
+                        <View style={styles.unitContainer}>
+                            <TouchableOpacity 
+                                style={styles.unitSelector}
+                                onPress={() => setShowUnitMenu(!showUnitMenu)}
+                            >
+                                <Text style={styles.unitText}>{goalData.unit || 'Select unit'}</Text>
+                            </TouchableOpacity>
+                            {showUnitMenu && (
+                                <View style={styles.unitMenu}>
+                                    {availableUnits.map((unit) => (
+                                        <TouchableOpacity
+                                            key={unit}
+                                            style={styles.unitOption}
+                                            onPress={() => {
+                                                setGoalData({ ...goalData, unit });
+                                                setShowUnitMenu(false);
+                                            }}
+                                        >
+                                            <Text style={[
+                                                styles.unitOptionText,
+                                                goalData.unit === unit && styles.selectedUnitText
+                                            ]}>
+                                                {unit}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
 
                         {error && (
                             <Text style={[globalStyles.errorText, { marginTop: spacing.sm }]}>
@@ -193,6 +232,50 @@ const styles = StyleSheet.create({
     },
     typeButtonTextActive: {
         color: colors.text.light,
+    },
+    unitContainer: {
+        marginBottom: spacing.sm,
+        position: 'relative',
+        zIndex: 1000,
+    },
+    unitSelector: {
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 8,
+        padding: spacing.sm,
+        backgroundColor: colors.background.primary,
+    },
+    unitText: {
+        color: colors.text.primary,
+    },
+    unitMenu: {
+        position: 'absolute',
+        top: '100%',
+        left: 0,
+        right: 0,
+        backgroundColor: colors.background.primary,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: colors.border,
+        zIndex: 1001,
+        marginTop: spacing.xs,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    unitOption: {
+        padding: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+    },
+    unitOptionText: {
+        color: colors.text.primary,
+    },
+    selectedUnitText: {
+        color: colors.primary,
+        fontWeight: '600',
     },
 });
 
