@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Goal } from "../../../types/goal";
-import { View, Text, TouchableOpacity, Modal, Slider } from 'react-native';
-import { globalStyles, colors, spacing } from '../../../styles/globalStyles';
+import { View, Text, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { globalStyles, colors, spacing, typography } from '../../../styles/globalStyles';
 import { goalService } from '../../../services/goalService';
 
 /**
@@ -28,6 +28,17 @@ const GoalProgress: React.FC<GoalProps> = ({ goal, onProgressUpdate }) => {
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [tempProgress, setTempProgress] = useState(goal.progress);
     const [isUpdating, setIsUpdating] = useState(false);
+
+    const handleProgressChange = (text: string) => {
+        const numericValue = text.replace(/[^0-9]/g, '');
+        
+        const value = parseInt(numericValue, 10);
+        if (!isNaN(value)) {
+            setTempProgress(Math.min(Math.max(value, 0), 100));
+        } else {
+            setTempProgress(0);
+        }
+    };
 
     const handleUpdateProgress = async () => {
         try {
@@ -71,18 +82,17 @@ const GoalProgress: React.FC<GoalProps> = ({ goal, onProgressUpdate }) => {
                         <Text style={styles.modalTitle}>Update Progress</Text>
                         <Text style={styles.modalSubtitle}>{goal.name}</Text>
                         
-                        <View style={styles.sliderContainer}>
-                            <Text style={styles.progressText}>{Math.round(tempProgress)}%</Text>
-                            <Slider
-                                style={styles.slider}
-                                minimumValue={0}
-                                maximumValue={100}
-                                value={tempProgress}
-                                onValueChange={setTempProgress}
-                                minimumTrackTintColor={colors.primary}
-                                maximumTrackTintColor={colors.background.secondary}
-                                thumbTintColor={colors.primary}
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={styles.input}
+                                value={tempProgress.toString()}
+                                onChangeText={handleProgressChange}
+                                keyboardType="numeric"
+                                maxLength={3}
+                                placeholder="Enter percentage (0-100)"
+                                placeholderTextColor={colors.text.secondary}
                             />
+                            <Text style={styles.percentageSymbol}>%</Text>
                         </View>
 
                         <View style={styles.buttonContainer}>
@@ -113,51 +123,50 @@ const styles = {
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center' as const,
+        alignItems: 'center' as const,
     },
     modalContent: {
-        backgroundColor: colors.background.primary,
-        borderRadius: 10,
-        padding: spacing.lg,
-        width: '80%',
+        ...globalStyles.card,
+        width: '80%' as const,
         maxWidth: 400,
+        marginBottom: 0,
     },
     modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.text.primary,
+        ...globalStyles.title,
         marginBottom: spacing.xs,
     },
     modalSubtitle: {
-        fontSize: 16,
-        color: colors.text.secondary,
+        ...globalStyles.subtitle,
         marginBottom: spacing.lg,
     },
-    sliderContainer: {
+    inputContainer: {
+        flexDirection: 'row' as const,
+        alignItems: 'center' as const,
         marginBottom: spacing.lg,
     },
-    progressText: {
+    input: {
+        ...globalStyles.input,
+        flex: 1,
+        marginBottom: 0,
+        textAlign: 'center' as const,
         fontSize: 24,
-        fontWeight: 'bold',
-        color: colors.primary,
-        textAlign: 'center',
-        marginBottom: spacing.sm,
+        fontWeight: 'bold' as const,
     },
-    slider: {
-        width: '100%',
-        height: 40,
+    percentageSymbol: {
+        ...typography.title,
+        color: colors.primary,
+        marginLeft: spacing.xs,
     },
     buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: 'row' as const,
+        justifyContent: 'space-between' as const,
         gap: spacing.sm,
     },
     button: {
+        ...globalStyles.button,
         flex: 1,
-        padding: spacing.sm,
-        borderRadius: 8,
-        alignItems: 'center',
+        marginTop: 0,
     },
     cancelButton: {
         backgroundColor: colors.background.secondary,
@@ -166,9 +175,7 @@ const styles = {
         backgroundColor: colors.primary,
     },
     buttonText: {
-        color: colors.text.light,
-        fontSize: 16,
-        fontWeight: '600',
+        ...globalStyles.buttonText,
     },
 };
 
