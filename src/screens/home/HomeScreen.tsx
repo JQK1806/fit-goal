@@ -15,7 +15,7 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
  * The landing page HomeScreen component that displays a users'
  *  - Workouts
  *  - Goals and progress
- *  - Recent Activity (WIP)
+ *  - Recent Activity
  * @returns {JSX.Element} The rendered HomeScreen
  */
 const HomeScreen = () => {
@@ -24,6 +24,10 @@ const HomeScreen = () => {
 
     const handleLogWorkout = () => {
         navigation.navigate('LogWorkout');
+    };
+
+    const handleSetGoal = () => {
+        navigation.navigate('LogGoal');
     };
 
     if (loading) {
@@ -88,7 +92,10 @@ const HomeScreen = () => {
                         >
                             <Text style={globalStyles.buttonText}>Log Workout</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={globalStyles.button}>
+                        <TouchableOpacity 
+                            style={globalStyles.button}
+                            onPress={handleSetGoal}
+                        >
                             <Text style={globalStyles.buttonText}>Set Goal</Text>
                         </TouchableOpacity>
                     </View>
